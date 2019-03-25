@@ -3,3 +3,23 @@ Get-ClusterNode
 Move-ClusterGroup "Cluster Group" -node "New Node"
 
 Move-ClusterGroup "Available Storage" 
+
+If you use Windows Server 2012 (R2) and higher, proceed as follows:
+
+To move Cluster Group, open PowerShell in elevated mode, and enter the following command:
+
+move-clustergroup "cluster group"
+
+To move Available Storage, open PowerShell in elevated mode, and enter the following command:
+
+move-clustergroup “Available Storage”
+
+If you use Windows Server 2008 (R2) proceed as follows:
+
+To move Cluster Group, open a command prompt and enter:
+
+cluster group “cluster group” /move
+
+To move Available Storage, open a command prompt and enter:
+
+cluster group “Available Storage” /move
