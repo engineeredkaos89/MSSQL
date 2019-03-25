@@ -1,0 +1,50 @@
+# Create Local logfile
+ $node = hostname
+ $date1=Get-Date -Format "yyyy-MM-dd hh:mm tt"
+ $clustervip=Get-Cluster
+ $clustervipname=($clustervip.Name)
+ $admin = (Get-Content -Path env:username).ToString()
+ $LogFileName = "c:\Support\ClusterResMove-"+ $node +".txt"
+ Out-File -append -FilePath $LogFileName -Encoding ASCII
+ Add-Content -Path $LogFileName -Value "Computer: $node" -Encoding ASCII
+ Add-Content -Path $LogFileName -Value "*****************************" -Encoding ASCII
+ 
+Import-Module FailoverClusters
+ Add-Content -Path $LogFileName -Value "Date: $date1" -Encoding ASCII
+ Add-Content -Path $LogFileName -Value "Executed By: $admin" -Encoding ASCII
+ Add-Content -Path $LogFileName -Value "Current Cluster Assignments" -Encoding ASCII
+ $computer = get-content env:computername
+ $computer = $computer.ToLower()
+ 
+Get-ClusterGroup | Out-File -append -Encoding ASCII -FilePath $LogFileName
+ 
+$clustergroups = Get-ClusterGroup | Where-Object {$_.IsCoreGroup -eq $false}
+ foreach ($cg in $clustergroups)
+    {
+     $CGName = $cg.Name
+      Add-Content -Path $LogFileName -Value "Getting Cluster Group Owners" -Encoding ASCII
+      $CurrentOwner = $cg.OwnerNode.Name
+       $POCount = (($cg | Get-ClusterOwnerNode).OwnerNodes).Count
+ if ($POCount -eq 0)
+    {
+    Add-Content -Path $LogFileName -Value "Info: $CGName doesn't have a preferred owner!" -Encoding ASCII
+     }
+    else
+    {
+    $PreferredOwner = ($cg | Get-ClusterOwnerNode).Ownernodes[0].Name
+     Add-Content -Path $LogFileName -Value "$PreferredOwner" -Encoding ASCII
+    if ($CurrentOwner -ne $PreferredOwner)
+    {
+     Add-Content -Path $LogFileName -Value "Moving resource to $PreferredOwner" -Encoding ASCII
+      $cg | Move-ClusterGroup -Node $PreferredOwner
+     }
+      else
+     {
+      Add-Content -Path $LogFileName -Value "Resource is already on preferred owner! ($PreferredOwner)" -Encoding ASCII
+       }
+     }
+  }
+   Add-Content -Path $LogFileName -Value "Cluster Balance Operation Completed" -Encoding ASCII
+   Add-Content -Path $LogFileName -Value "New Cluster Assignments" -Encoding ASCII
+   Get-ClusterGroup | Out-File -append -Encoding ASCII -FilePath $LogFileName
+ }
