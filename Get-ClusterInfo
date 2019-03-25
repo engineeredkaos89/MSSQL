@@ -1,5 +1,5 @@
 Get-ClusterNode
 
-Move-ClusterGroup "Cluster Group"
+Move-ClusterGroup "Cluster Group" -node "New Node"
 
 Move-ClusterGroup "Available Storage" 
